@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landmine Game - Avoid the Mines!</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="warning-banner">
+        <i class="fas fa-exclamation-triangle"></i> This is a social awareness campaign to highlight how betting apps mislead youth. Stay informed, gamble responsibly.
+    </div>
+    
+    <div class="game-container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="game">
+                <i class="fas fa-gamepad"></i> Game
+            </button>
+            <button class="tab-btn" data-tab="stats">
+                <i class="fas fa-chart-bar"></i> Stats
+            </button>
+            <button class="tab-btn" data-tab="help">
+                <i class="fas fa-question-circle"></i> Help
+            </button>
+        </div>
+        
+        <div class="tab-content active" id="game-tab">
+            <h1><i class="fas fa-bomb"></i> Landmine Game - Avoid the Mines!</h1>
+            
+            <div class="glass-panel">
+                <div class="balance-info">
+                    <div class="balance-item">
+                        <span class="label">Total Balance:</span>
+                        <span class="value">₹<span id="balance">{{ balance }}</span></span>
+                    </div>
+                    <div class="balance-item">
+                        <span class="label">Profit:</span>
+                        <span class="value profit">₹<span id="profit">0</span></span>
+                    </div>
+                    <div class="balance-item">
+                        <span class="label">Multiplier:</span>
+                        <span class="value multiplier"><span id="multiplier">1.00</span>x</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="game-settings glass-panel">
+                <div class="settings-group">
+                    <label for="numMines">
+                        <i class="fas fa-bomb"></i> Number of Landmines:
+                    </label>
+                    <div class="number-input">
+                        <button class="decrease">-</button>
+                        <input type="number" id="numMines" min="1" max="20" value="3">
+                        <button class="increase">+</button>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <label for="betAmount">
+                        <i class="fas fa-coins"></i> Bet Amount:
+                    </label>
+                    <div class="number-input">
+                        <button class="decrease">-</button>
+                        <input type="number" id="betAmount" min="10" step="10" value="100">
+                        <button class="increase">+</button>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <label for="autoCashout">
+                        <i class="fas fa-robot"></i> Auto Cash Out at:
+                    </label>
+                    <div class="number-input">
+                        <button class="decrease">-</button>
+                        <input type="number" id="autoCashout" min="0" step="0.5" value="0" placeholder="Disabled">
+                        <button class="increase">+</button>
+                    </div>
+                    <span class="auto-cashout-hint">0 = Disabled</span>
+                </div>
+            </div>
+            
+            <div class="game-controls">
+                <button id="startGame" class="btn-primary">
+                    <i class="fas fa-play"></i> Start Game
+                </button>
+                <button id="cashOut" class="btn-secondary" disabled>
+                    <i class="fas fa-hand-holding-usd"></i> Cash Out
+                </button>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-label">Game Progress: <span id="progress-text">0/22</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+            
+            <div class="game-board" id="gameBoard"></div>
+            
+            <div class="message-container">
+                <div id="message" class="message"></div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="stats-tab">
+            <h1><i class="fas fa-chart-bar"></i> Game Statistics</h1>
+            
+            <div class="stats-container glass-panel">
+                <div class="stats-box">
+                    <div class="stat-item">
+                        <div class="stat-label">Games Played</div>
+                        <div class="stat-value">{{ stats.games_played }}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Wins</div>
+                        <div class="stat-value win">{{ stats.wins }}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Losses</div>
+                        <div class="stat-value loss">{{ stats.losses }}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Win Rate</div>
+                        <div class="stat-value">
+                            {% if stats.games_played > 0 %}
+                                {{ (stats.wins / stats.games_played * 100) | round }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Highest Profit</div>
+                        <div class="stat-value">₹{{ stats.highest_profit }}</div>
+                    </div>
+                </div>
+                
+                <button id="resetStats" class="btn-danger">
+                    <i class="fas fa-trash"></i> Reset Statistics
+                </button>
+            </div>
+            
+            <h2><i class="fas fa-history"></i> Game History</h2>
+            <div class="history-container glass-panel">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Bet</th>
+                            <th>Mines</th>
+                            <th>Profit</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if history %}
+                            {% for game in history %}
+                                <tr>
+                                    <td>{{ game.date }}</td>
+                                    <td>₹{{ game.bet }}</td>
+                                    <td>{{ game.mines }}</td>
+                                    <td class="{{ 'profit-positive' if game.profit > 0 else 'profit-negative' }}">
+                                        {{ '+' if game.profit > 0 else '' }}₹{{ game.profit }}
+                                    </td>
+                                    <td class="{{ 'result-win' if game.result == 'Win' else 'result-loss' }}">
+                                        {{ game.result }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="no-data">No game history available</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="help-tab">
+            <h1><i class="fas fa-question-circle"></i> How to Play</h1>
+            
+            <div class="help-container glass-panel">
+                <div class="help-section">
+                    <h3><i class="fas fa-info-circle"></i> Game Rules</h3>
+                    <p>Landmine is a game of chance where you need to avoid hidden mines on the board:</p>
+                    <ol>
+                        <li>Select the number of mines (1-20) to hide on the board.</li>
+                        <li>Enter your bet amount.</li>
+                        <li>Click on squares to reveal them.</li>
+                        <li>Each safe square increases your multiplier.</li>
+                        <li>Cash out anytime to secure your winnings.</li>
+                        <li>If you hit a mine, you lose your bet!</li>
+                    </ol>
+                </div>
+                
+                <div class="help-section">
+                    <h3><i class="fas fa-lightbulb"></i> Tips</h3>
+                    <ul>
+                        <li>More mines = higher risk but higher rewards.</li>
+                        <li>Use the Auto Cash Out feature to automatically secure profits.</li>
+                        <li>The grid has 25 squares total - choose mines wisely!</li>
+                        <li>Check your statistics to see your performance over time.</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3><i class="fas fa-calculator"></i> Multiplier System</h3>
+                    <p>The multiplier increases with each safe square you reveal. The formula accounts for risk:</p>
+                    <ul>
+                        <li>Higher mine count = faster multiplier growth</li>
+                        <li>The multiplier determines your profit: Bet × (Multiplier - 1)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <audio id="click-sound" src="{{ url_for('static', filename='sounds/click.mp3') }}" preload="auto"></audio>
+    <audio id="win-sound" src="{{ url_for('static', filename='sounds/win.mp3') }}" preload="auto"></audio>
+    <audio id="lose-sound" src="{{ url_for('static', filename='sounds/lose.mp3') }}" preload="auto"></audio>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
