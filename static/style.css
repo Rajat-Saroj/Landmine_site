@@ -40,18 +40,46 @@ body {
 }
 
 .warning-banner {
-  background-color: rgba(243, 156, 18, 0.15);
-  color: var(--warning-color);
-  padding: 12px;
-  text-align: center;
+  background: linear-gradient(90deg, rgba(243,156,18,0.18) 0%, rgba(255,241,204,0.9) 100%);
+  color: #a66900; /* Strong contrast for warning */
+  padding: 16px 48px 16px 16px;
+  margin: 20px auto;
+  border-left: 5px solid #f39c12;
+  border-radius: 8px;
   font-weight: 600;
-  font-size: 14px;
-  border-bottom: 1px solid rgba(243, 156, 18, 0.3);
-  backdrop-filter: blur(5px);
+  font-size: 15px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  box-shadow: 0 2px 12px rgba(243, 156, 18, 0.10);
+  position: relative;
+  max-width: 700px;
+  text-align: left;
+  backdrop-filter: blur(3px);
+  transition: box-shadow 0.2s;
 }
 
 .warning-banner i {
-  margin-right: 8px;
+  margin-right: 10px;
+  color: #f39c12;
+  font-size: 18px;
+  vertical-align: middle;
+}
+
+.warning-banner .close-btn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  color: #a66900;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.warning-banner .close-btn:hover {
+  opacity: 1;
 }
 
 .game-container {
